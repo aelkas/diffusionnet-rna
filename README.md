@@ -29,15 +29,15 @@ Everything below lives on the surface $S$ approximated by the mesh. A feature is
 
 **Learned diffusion.** The heat equation $\partial_t h = -\Delta h$ with $h(0) = u$ spreads $u$ over the surface, and its solution at time $t$ is approximated in the spectral basis by
 
-$$h_t = \Phi \, \mathrm{diag}\big(e^{-\lambda_1 t}, \dots, e^{-\lambda_K t}\big) \, \Phi^{\top} M u .$$
+$$h_t = \Phi \mathrm{diag}\big(e^{-\lambda_1 t}, \dots, e^{-\lambda_K t}\big) \Phi^{\top} M u .$$
 
 Each channel has its own time $t_c \ge 0$, and these times are parameters learned by gradient descent. A small $t_c$ keeps the channel local, a large one averages it over most of the molecule, so the network chooses its own receptive field per channel. Because $L$, $M$ and $\Phi$ only depend on the intrinsic geometry, this step gives the same result whatever the mesh's resolution or orientation.
 
-**Gradient features.** Diffusion alone is isotropic. To see directions, each diffused channel $h_c$ gets a gradient $w_c = (G_X h_c) + i\,(G_Y h_c) \in \mathbb{C}$ at each vertex, written as a complex number in the local frame. A learned complex matrix $B$ mixes the channels, and the network keeps
+**Gradient features.** Diffusion alone is isotropic. To see directions, each diffused channel $h_c$ gets a gradient $w_c = (G_X h_c) + i(G_Y h_c) \in \mathbb{C}$ at each vertex, written as a complex number in the local frame. A learned complex matrix $B$ mixes the channels, and the network keeps
 
-$$g_c = \tanh\big(\mathrm{Re}\,(\overline{w_c}\, (B w)_c)\big).$$
+$$g_c = \tanh\big(\mathrm{Re}(\overline{w_c} (B w)_c)\big).$$
 
-Changing the tangent frame at a vertex multiplies every $w_c$ there by the same unit complex number, which cancels in $\overline{w_c}\,(Bw)_c$, so $g$ does not depend on the arbitrary choice of frames.
+Changing the tangent frame at a vertex multiplies every $w_c$ there by the same unit complex number, which cancels in $\overline{w_c}(Bw)_c$, so $g$ does not depend on the arbitrary choice of frames.
 
 **Blocks.** A block takes $u$, computes $h_t$ and $g$, feeds the concatenation $[u, h_t, g]$ to a pointwise MLP (the same MLP at every vertex, with dropout), and adds the result back to $u$. The full network is a linear layer from the input features to 128 channels, four blocks, and a linear layer to the 160 class scores.
 
